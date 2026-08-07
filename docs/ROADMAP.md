@@ -10,3 +10,9 @@
 | C5 | Signed installer Â· consultancy.aorms.in CTA |
 
 Upstream: esti ROADMAP D-waves. Open source until SaaS licensing is decided.
+
+
+## D5 — engine pin
+
+See [ENGINE-PIN.md](ENGINE-PIN.md). Aorms.Bridge landed on AQC main (PR #5).
+
