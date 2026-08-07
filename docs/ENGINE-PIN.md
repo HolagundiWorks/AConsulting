@@ -1,14 +1,20 @@
-# Engine + bridge pin (D5 kickoff)
+# Engine + bridge pin (D5)
 
-**Status:** Kickoff · **Updated:** 2026-08-07  
-**Upstream:** [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC) `main`
+**Status:** Pin ready Â· **Updated:** 2026-08-07  
+**Upstream:** [HolagundiWorks/AQC](https://github.com/HolagundiWorks/AQC)  
+**Baseline:** tag `aorms-bridge-d2`
 
-Same pin as AStudio — share `bbs_engine` + `Aorms.Bridge`; specialize engineering domain UI only.
+Same pin as AStudio â€” share `bbs_engine` + `Aorms.Bridge`; specialize engineering domain UI only.
 
 | Artifact | Consume from |
 | --- | --- |
-| C++ `bbs_engine` | AQC — single SoT |
-| `Aorms.Bridge` | AQC `BBSDesktop/Aorms.Bridge` (merged) |
-| Wire | esti PORTAL-SYNC-BRIDGE · HUB-API `2026-08` |
+| C++ `bbs_engine` | AQC â€” single SoT at tag `aorms-bridge-d2` |
+| `Aorms.Bridge` | AQC `BBSDesktop/Aorms.Bridge` |
+| Wire | esti PORTAL-SYNC-BRIDGE Â· HUB-API `2026-08` |
+
+```bash
+git submodule add https://github.com/HolagundiWorks/AQC.git vendor/AQC
+cd vendor/AQC && git checkout aorms-bridge-d2
+```
 
 Open source; SaaS licensing deferred.
