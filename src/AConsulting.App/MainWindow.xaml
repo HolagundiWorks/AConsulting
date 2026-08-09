@@ -5,16 +5,15 @@
     Title="AConsulting">
 
     <!--
-      HCW geography scaffold (DESKTOP-WEB-PARITY):
-      Ribbon · Stage · ActionDock · status tray.
-      Practice nav labels for engineering consultancy IA.
+      HCW geography (capacity pass):
+      Ribbon ≤5 peers · Stage = Tasks only · one orange commit · Hub/license in tray.
     -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="56"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="64"/>
-            <RowDefinition Height="32"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="#ECEEF2" Padding="16,0">
@@ -33,7 +32,6 @@
                     <Button Content="Practice" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
                     <Button Content="Clients" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
                     <Button Content="Projects" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
-                    <Button Content="People" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
                     <Button Content="Office" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
                     <Button Content="Tasks" Style="{StaticResource AccentButtonStyle}"/>
                 </StackPanel>
@@ -48,37 +46,19 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <StackPanel Spacing="4">
                     <TextBlock Text="Tasks" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                    <TextBlock Text="Local firm.db → publish to Mongo ops. Engagements · Office next."
+                    <TextBlock Text="Create locally, then publish once. Hub sync and licence live in the tray below."
                                Opacity="0.7" TextWrapping="Wrap"/>
                 </StackPanel>
 
                 <Border Grid.Row="1" Padding="16" CornerRadius="8" Background="#FFFFFF"
                         BorderBrush="#D0D4DC" BorderThickness="1">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="Hub bridge" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="HubStatusText" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap"
-                                   FontFamily="Consolas" FontSize="12"/>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBox x:Name="LicenseKeyBox" Width="280"
-                                     PlaceholderText="License key (HLP-…)" Header="Activate"/>
-                            <Button Content="Activate" Click="Activate_Click" VerticalAlignment="Bottom"/>
-                            <Button Content="Flush meta" Click="Flush_Click" VerticalAlignment="Bottom"/>
-                            <Button Content="Refresh" Click="Refresh_Click" VerticalAlignment="Bottom"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Row="2" Padding="16" CornerRadius="8" Background="#FFFFFF"
-                        BorderBrush="#D0D4DC" BorderThickness="1">
-                    <StackPanel Spacing="8">
                         <TextBlock Text="Task board" FontWeight="SemiBold"/>
-                        <TextBlock Text="Create and commit via the ActionDock below (HCW zones)."
+                        <TextBlock Text="ActionDock: Clear · Save local · Publish to hub (commit)."
                                    Opacity="0.7" FontSize="12"/>
                         <TextBox x:Name="TaskTitleBox" Header="Title" PlaceholderText="Task title"/>
                         <TextBox x:Name="TaskProjectBox" Header="Project id (UUID)"
@@ -88,7 +68,7 @@
                     </StackPanel>
                 </Border>
 
-                <TextBlock Grid.Row="3"
+                <TextBlock Grid.Row="2"
                            Text="Technical calc lives in AQC Estimation / BBS / PM. Launch from AORMS Connect."
                            Opacity="0.55" TextWrapping="Wrap" FontSize="12"/>
             </Grid>
@@ -105,8 +85,7 @@
                     <Button Content="Clear form" Click="ClearForm_Click" MinHeight="44"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button Content="Save local" Click="SaveTaskLocal_Click"
-                            Style="{StaticResource AccentButtonStyle}" MinHeight="44" MinWidth="120"/>
+                    <Button Content="Save local" Click="SaveTaskLocal_Click" MinHeight="44" MinWidth="120"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -117,9 +96,21 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="3" Background="#ECEEF2" Padding="16,0" BorderBrush="#D0D4DC" BorderThickness="0,1,0,0">
-            <TextBlock Text="AConsulting · suite practice manager · sync tray"
-                       VerticalAlignment="Center" FontSize="11" Opacity="0.55"/>
+        <Border Grid.Row="3" Background="#ECEEF2" Padding="16,8" BorderBrush="#D0D4DC" BorderThickness="0,1,0,0">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Sync tray · hub + licence"
+                           FontSize="11" Opacity="0.55"/>
+                <TextBlock x:Name="HubStatusText" TextWrapping="Wrap" FontSize="12"/>
+                <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap"
+                           FontFamily="Consolas" FontSize="11"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBox x:Name="LicenseKeyBox" Width="280"
+                             PlaceholderText="License key (HLP-…)" Header="Activate"/>
+                    <Button Content="Activate" Click="Activate_Click" VerticalAlignment="Bottom"/>
+                    <Button Content="Flush meta" Click="Flush_Click" VerticalAlignment="Bottom"/>
+                    <Button Content="Refresh" Click="Refresh_Click" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </StackPanel>
         </Border>
     </Grid>
 </Window>
