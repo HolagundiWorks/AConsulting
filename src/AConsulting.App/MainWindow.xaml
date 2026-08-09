@@ -5,8 +5,8 @@
     Title="AConsulting">
 
     <!--
-      HCW geography (capacity pass):
-      Ribbon ≤5 peers · Stage = Tasks only · one orange commit · Hub/license in tray.
+      HCW geography · W3:
+      Ribbon ≤5 · Stage = Projects (engagements) + Tasks · one orange commit · tray hub.
     -->
     <Grid>
         <Grid.RowDefinitions>
@@ -29,11 +29,11 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button Content="Practice" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
-                    <Button Content="Clients" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
-                    <Button Content="Projects" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
-                    <Button Content="Office" Style="{StaticResource SubtleButtonStyle}" IsEnabled="False"/>
-                    <Button Content="Tasks" Style="{StaticResource AccentButtonStyle}"/>
+                    <Button Content="Practice" IsEnabled="False"/>
+                    <Button Content="Clients" IsEnabled="False"/>
+                    <Button x:Name="NavProjectsBtn" Content="Projects" Click="NavProjects_Click"/>
+                    <Button Content="Office" IsEnabled="False"/>
+                    <Button x:Name="NavTasksBtn" Content="Tasks" Click="NavTasks_Click"/>
                 </StackPanel>
                 <TextBlock Grid.Column="2" Text="Local AI · desktop" Opacity="0.55"
                            VerticalAlignment="Center" FontSize="12"/>
@@ -41,36 +41,65 @@
         </Border>
 
         <ScrollViewer Grid.Row="1" Background="#F2F4F7" Padding="24">
-            <Grid MaxWidth="960" HorizontalAlignment="Left" RowSpacing="16">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+            <Grid MaxWidth="960" HorizontalAlignment="Left">
 
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Tasks" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                    <TextBlock Text="Create locally, then publish once. Hub sync and licence live in the tray below."
-                               Opacity="0.7" TextWrapping="Wrap"/>
+                <StackPanel x:Name="PanelProjects" Spacing="16" Visibility="Visible">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Projects · Engagements" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
+                        <TextBlock Text="Local engagements in firm.db. Publish status meta to the hub; import from AORMS Connect catalog."
+                                   Opacity="0.7" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="AORMS Connect" FontWeight="SemiBold"/>
+                            <TextBlock Text="Pull catalog projects into engagements (idempotent on id)."
+                                       Opacity="0.7" TextWrapping="Wrap"/>
+                            <Button x:Name="ImportConnectBtn" Content="Import from Connect"
+                                    Click="ImportCatalog_Click" MinHeight="44" MinWidth="180"/>
+                            <TextBlock x:Name="CatalogImportNote" TextWrapping="Wrap" FontSize="12"
+                                       Opacity="0.75"
+                                       Text="No import yet — run AORMS Connect, then Import from Connect."/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="New engagement" FontWeight="SemiBold"/>
+                            <TextBox x:Name="EngTitleBox" Header="Title" PlaceholderText="Structural PE · Tower A"/>
+                            <TextBox x:Name="EngCodeBox" Header="Code / job #" PlaceholderText="ACE-2026-001"/>
+                            <TextBox x:Name="EngStageBox" Header="Stage" PlaceholderText="Enquiry / Award / Delivery"/>
+                            <TextBox x:Name="EngDisciplineBox" Header="Discipline" PlaceholderText="Structural / MEP"/>
+                            <TextBlock Text="Local engagements" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock x:Name="EngListText" FontFamily="Consolas" FontSize="12"
+                                       TextWrapping="Wrap"/>
+                            <Button Content="Select next" Click="SelectNextEng_Click" MinHeight="44"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
 
-                <Border Grid.Row="1" Padding="16" CornerRadius="8" Background="#FFFFFF"
-                        BorderBrush="#D0D4DC" BorderThickness="1">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Task board" FontWeight="SemiBold"/>
-                        <TextBlock Text="ActionDock: Clear · Save local · Publish to hub (commit)."
-                                   Opacity="0.7" FontSize="12"/>
-                        <TextBox x:Name="TaskTitleBox" Header="Title" PlaceholderText="Task title"/>
-                        <TextBox x:Name="TaskProjectBox" Header="Project id (UUID)"
-                                 Text="00000000-0000-0000-0000-000000000001"/>
-                        <TextBlock x:Name="TaskListText" FontFamily="Consolas" FontSize="12"
-                                   TextWrapping="Wrap"/>
+                <StackPanel x:Name="PanelTasks" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Tasks" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
+                        <TextBlock Text="Create locally, then publish once. Hub sync and licence live in the tray below."
+                                   Opacity="0.7" TextWrapping="Wrap"/>
                     </StackPanel>
-                </Border>
-
-                <TextBlock Grid.Row="2"
-                           Text="Technical calc lives in AQC Estimation / BBS / PM. Launch from AORMS Connect."
-                           Opacity="0.55" TextWrapping="Wrap" FontSize="12"/>
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Task board" FontWeight="SemiBold"/>
+                            <TextBox x:Name="TaskTitleBox" Header="Title" PlaceholderText="Task title"/>
+                            <TextBox x:Name="TaskProjectBox" Header="Engagement / project id (UUID)"
+                                     PlaceholderText="Uses selected engagement when set"/>
+                            <TextBlock x:Name="TaskListText" FontFamily="Consolas" FontSize="12"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="Technical calc lives in AQC Estimation / BBS / PM. Launch from AORMS Connect."
+                               Opacity="0.55" TextWrapping="Wrap" FontSize="12"/>
+                </StackPanel>
             </Grid>
         </ScrollViewer>
 
@@ -83,14 +112,17 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <Button Content="Clear form" Click="ClearForm_Click" MinHeight="44"/>
+                    <Button x:Name="DockImportBtn" Content="Import from Connect"
+                            Click="ImportCatalog_Click" MinHeight="44" Visibility="Visible"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button Content="Save local" Click="SaveTaskLocal_Click" MinHeight="44" MinWidth="120"/>
+                    <Button x:Name="DockCreateBtn" Content="Save engagement" Click="DockCreate_Click"
+                            MinHeight="44" MinWidth="140"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Content="Reload" Click="ReloadTasks_Click" MinHeight="44"/>
-                    <Button Content="Publish to hub" Click="PublishTask_Click"
+                    <Button x:Name="DockReloadBtn" Content="Reload" Click="DockReload_Click" MinHeight="44"/>
+                    <Button x:Name="DockCommitBtn" Content="Publish status" Click="DockCommit_Click"
                             Background="#FF4F18" Foreground="White" MinHeight="44" MinWidth="140"/>
                 </StackPanel>
             </Grid>
@@ -98,7 +130,7 @@
 
         <Border Grid.Row="3" Background="#ECEEF2" Padding="16,8" BorderBrush="#D0D4DC" BorderThickness="0,1,0,0">
             <StackPanel Spacing="6">
-                <TextBlock Text="Sync tray · hub + licence"
+                <TextBlock x:Name="TrayText" Text="AConsulting · Projects"
                            FontSize="11" Opacity="0.55"/>
                 <TextBlock x:Name="HubStatusText" TextWrapping="Wrap" FontSize="12"/>
                 <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap"
