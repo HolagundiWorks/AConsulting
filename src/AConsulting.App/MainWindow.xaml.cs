@@ -11,6 +11,7 @@ namespace AConsulting.App;
 enum ShellModule
 {
     Projects,
+    Office,
     Tasks,
 }
 
@@ -18,15 +19,19 @@ public sealed partial class MainWindow : Window
 {
     readonly AormsBridge _bridge;
     readonly LocalEngagementsStore _engagements;
+    readonly LocalOfficeEnquiriesStore _enquiries;
     ShellModule _module = ShellModule.Projects;
     string? _selectedEngagementId;
+    string? _selectedEnquiryId;
 
     public MainWindow()
     {
         InitializeComponent();
         ExtendsContentIntoTitleBar = false;
         _bridge = AormsBridgeHost.CreateFromEnvironment();
-        _engagements = new LocalEngagementsStore(LocalEngagementsStore.DefaultFirmDbPath());
+        var dbPath = LocalEngagementsStore.DefaultFirmDbPath();
+        _engagements = new LocalEngagementsStore(dbPath);
+        _enquiries = new LocalOfficeEnquiriesStore(dbPath);
         ShowModule(ShellModule.Projects);
         RefreshStatus("Ready.");
     }
@@ -35,23 +40,38 @@ public sealed partial class MainWindow : Window
     {
         _module = module;
         PanelProjects.Visibility = module == ShellModule.Projects ? Visibility.Visible : Visibility.Collapsed;
+        PanelOffice.Visibility = module == ShellModule.Office ? Visibility.Visible : Visibility.Collapsed;
         PanelTasks.Visibility = module == ShellModule.Tasks ? Visibility.Visible : Visibility.Collapsed;
 
         StyleNav(NavProjectsBtn, module == ShellModule.Projects);
+        StyleNav(NavOfficeBtn, module == ShellModule.Office);
         StyleNav(NavTasksBtn, module == ShellModule.Tasks);
 
         DockImportBtn.Visibility = module == ShellModule.Projects
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-        DockCreateBtn.Content = module == ShellModule.Projects ? "Save engagement" : "Save local";
-        DockCommitBtn.Content = module == ShellModule.Projects ? "Publish status" : "Publish to hub";
+        DockCreateBtn.Content = module switch
+        {
+            ShellModule.Projects => "Save engagement",
+            ShellModule.Office => "Save enquiry",
+            _ => "Save local",
+        };
+        DockCommitBtn.Content = module switch
+        {
+            ShellModule.Projects => "Publish status",
+            ShellModule.Office => "Publish decision",
+            _ => "Publish to hub",
+        };
         TrayText.Text = $"AConsulting · {_module}";
 
         switch (module)
         {
             case ShellModule.Projects:
                 ReloadEngagements();
+                break;
+            case ShellModule.Office:
+                ReloadEnquiries();
                 break;
             case ShellModule.Tasks:
                 if (!string.IsNullOrEmpty(_selectedEngagementId) &&
@@ -81,6 +101,7 @@ public sealed partial class MainWindow : Window
     }
 
     void NavProjects_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Projects);
+    void NavOffice_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Office);
     void NavTasks_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Tasks);
 
     void RefreshStatus(string? note = null)
@@ -289,6 +310,131 @@ public sealed partial class MainWindow : Window
             ShowModule(ShellModule.Projects);
     }
 
+    void ReloadEnquiries()
+    {
+        var rows = _enquiries.List();
+        if (rows.Count == 0)
+        {
+            EnqListText.Text = "(empty — save an enquiry with DRAFT / GO / NO_GO)";
+            return;
+        }
+        EnqListText.Text = string.Join("\n", rows.Select(r =>
+        {
+            var mark = r.EnquiryId == _selectedEnquiryId ? ">" : " ";
+            return $"{mark} {r.Decision}/{r.PublishState}  {r.Subject}  ·  {r.ClientName}  [{r.EnquiryId}]";
+        }));
+        if (_selectedEnquiryId is null)
+            _selectedEnquiryId = rows[0].EnquiryId;
+    }
+
+    void SelectNextEnq_Click(object sender, RoutedEventArgs e)
+    {
+        var rows = _enquiries.List();
+        if (rows.Count == 0)
+        {
+            TrayText.Text = "No enquiries yet.";
+            return;
+        }
+        var idx = rows.ToList().FindIndex(r => r.EnquiryId == _selectedEnquiryId);
+        idx = (idx + 1) % rows.Count;
+        _selectedEnquiryId = rows[idx].EnquiryId;
+        var cur = rows[idx];
+        EnqSubjectBox.Text = cur.Subject;
+        EnqClientBox.Text = cur.ClientName;
+        EnqDecisionBox.Text = cur.Decision;
+        EnqNotesBox.Text = cur.Notes;
+        ReloadEnquiries();
+        TrayText.Text = $"Selected enquiry · {_selectedEnquiryId}";
+    }
+
+    void SaveEnquiry()
+    {
+        var subject = EnqSubjectBox.Text?.Trim() ?? "";
+        if (string.IsNullOrEmpty(subject))
+        {
+            TrayText.Text = "Subject required.";
+            return;
+        }
+        var decision = string.IsNullOrWhiteSpace(EnqDecisionBox.Text)
+            ? "DRAFT"
+            : EnqDecisionBox.Text.Trim().ToUpperInvariant();
+        if (decision is not ("DRAFT" or "GO" or "NO_GO"))
+            decision = "DRAFT";
+
+        // Update selected row when form was loaded via Select next; otherwise create.
+        var existing = _selectedEnquiryId is null ? null : _enquiries.Get(_selectedEnquiryId);
+        var updating = existing is not null &&
+            string.Equals(EnqSubjectBox.Text?.Trim(), existing.Subject, StringComparison.Ordinal);
+        var id = updating ? existing!.EnquiryId : Guid.NewGuid().ToString("N")[..12];
+        var publishState = updating ? existing!.PublishState : "LOCAL";
+
+        _enquiries.Upsert(
+            id,
+            subject,
+            EnqClientBox.Text?.Trim() ?? "",
+            decision,
+            EnqNotesBox.Text ?? "",
+            publishState);
+        _selectedEnquiryId = id;
+        EnqSubjectBox.Text = "";
+        EnqClientBox.Text = "";
+        EnqDecisionBox.Text = "";
+        EnqNotesBox.Text = "";
+        ReloadEnquiries();
+        TrayText.Text = $"Saved enquiry {id} · {decision}";
+    }
+
+    async Task PublishEnquiryDecisionAsync()
+    {
+        var id = _selectedEnquiryId;
+        if (id is null)
+        {
+            TrayText.Text = "No enquiry selected — save or Select next.";
+            return;
+        }
+        var row = _enquiries.Get(id);
+        if (row is null)
+        {
+            TrayText.Text = "Enquiry not found.";
+            return;
+        }
+        if (row.Decision is "DRAFT")
+        {
+            TrayText.Text = "Set decision to GO or NO_GO before publish.";
+            return;
+        }
+        try
+        {
+            _bridge.EnqueueMeta("officeEnquiry", row.EnquiryId, new Dictionary<string, object?>
+            {
+                ["enquiryId"] = row.EnquiryId,
+                ["subject"] = row.Subject,
+                ["clientName"] = row.ClientName,
+                ["decision"] = row.Decision,
+                ["updatedAt"] = DateTime.UtcNow.ToString("O"),
+            });
+            _enquiries.Upsert(row.EnquiryId, row.Subject, row.ClientName, row.Decision, row.Notes, "QUEUED");
+            var result = await _bridge.FlushAsync();
+            if (result.SkippedReason is not null)
+            {
+                TrayText.Text =
+                    $"Queued officeEnquiry; flush skipped={result.SkippedReason} — Activate first.";
+                LogText.Text = $"Flush skipped={result.SkippedReason}";
+            }
+            else
+            {
+                _enquiries.Upsert(row.EnquiryId, row.Subject, row.ClientName, row.Decision, row.Notes, "PUBLISHED");
+                TrayText.Text = $"Published decision · {row.Decision} · {row.Subject}";
+                LogText.Text = $"officeEnquiry OK · {row.EnquiryId}";
+            }
+            ReloadEnquiries();
+        }
+        catch (Exception ex)
+        {
+            TrayText.Text = $"Publish failed: {ex.Message}";
+        }
+    }
+
     void SaveTaskLocal()
     {
         var title = TaskTitleBox.Text?.Trim() ?? "";
@@ -345,36 +491,73 @@ public sealed partial class MainWindow : Window
 
     void ClearForm_Click(object sender, RoutedEventArgs e)
     {
-        if (_module == ShellModule.Projects)
+        switch (_module)
         {
-            EngTitleBox.Text = "";
-            EngCodeBox.Text = "";
-            EngStageBox.Text = "";
-            EngDisciplineBox.Text = "";
+            case ShellModule.Projects:
+                EngTitleBox.Text = "";
+                EngCodeBox.Text = "";
+                EngStageBox.Text = "";
+                EngDisciplineBox.Text = "";
+                break;
+            case ShellModule.Office:
+                EnqSubjectBox.Text = "";
+                EnqClientBox.Text = "";
+                EnqDecisionBox.Text = "";
+                EnqNotesBox.Text = "";
+                break;
+            default:
+                TaskTitleBox.Text = "";
+                break;
         }
-        else
-            TaskTitleBox.Text = "";
         TrayText.Text = "Form cleared.";
     }
 
     void DockCreate_Click(object sender, RoutedEventArgs e)
     {
-        if (_module == ShellModule.Projects) SaveEngagement();
-        else SaveTaskLocal();
+        switch (_module)
+        {
+            case ShellModule.Projects:
+                SaveEngagement();
+                break;
+            case ShellModule.Office:
+                SaveEnquiry();
+                break;
+            default:
+                SaveTaskLocal();
+                break;
+        }
     }
 
     void DockReload_Click(object sender, RoutedEventArgs e)
     {
-        if (_module == ShellModule.Projects) ReloadEngagements();
-        else ReloadTasks();
+        switch (_module)
+        {
+            case ShellModule.Projects:
+                ReloadEngagements();
+                break;
+            case ShellModule.Office:
+                ReloadEnquiries();
+                break;
+            default:
+                ReloadTasks();
+                break;
+        }
         TrayText.Text = "Reloaded.";
     }
 
     async void DockCommit_Click(object sender, RoutedEventArgs e)
     {
-        if (_module == ShellModule.Projects)
-            await PublishEngagementStatusAsync();
-        else
-            await PublishTaskAsync();
+        switch (_module)
+        {
+            case ShellModule.Projects:
+                await PublishEngagementStatusAsync();
+                break;
+            case ShellModule.Office:
+                await PublishEnquiryDecisionAsync();
+                break;
+            default:
+                await PublishTaskAsync();
+                break;
+        }
     }
 }

@@ -5,8 +5,8 @@
     Title="AConsulting">
 
     <!--
-      HCW geography · W3:
-      Ribbon ≤5 · Stage = Projects (engagements) + Tasks · one orange commit · tray hub.
+      HCW geography · W3+:
+      Ribbon ≤5 · Stage = Projects · Office · Tasks · one orange commit · tray hub.
     -->
     <Grid>
         <Grid.RowDefinitions>
@@ -32,7 +32,7 @@
                     <Button Content="Practice" IsEnabled="False"/>
                     <Button Content="Clients" IsEnabled="False"/>
                     <Button x:Name="NavProjectsBtn" Content="Projects" Click="NavProjects_Click"/>
-                    <Button Content="Office" IsEnabled="False"/>
+                    <Button x:Name="NavOfficeBtn" Content="Office" Click="NavOffice_Click"/>
                     <Button x:Name="NavTasksBtn" Content="Tasks" Click="NavTasks_Click"/>
                 </StackPanel>
                 <TextBlock Grid.Column="2" Text="Local AI · desktop" Opacity="0.55"
@@ -76,6 +76,29 @@
                             <TextBlock x:Name="EngListText" FontFamily="Consolas" FontSize="12"
                                        TextWrapping="Wrap"/>
                             <Button Content="Select next" Click="SelectNextEng_Click" MinHeight="44"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel x:Name="PanelOffice" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Office · Enquiries" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
+                        <TextBlock Text="Go / no-go enquiry register in firm.db. Publish decision meta to the hub."
+                                   Opacity="0.7" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="New enquiry" FontWeight="SemiBold"/>
+                            <TextBox x:Name="EnqSubjectBox" Header="Subject" PlaceholderText="Peer review · hospital block"/>
+                            <TextBox x:Name="EnqClientBox" Header="Client / owner" PlaceholderText="Firm or developer"/>
+                            <TextBox x:Name="EnqDecisionBox" Header="Decision" PlaceholderText="DRAFT · GO · NO_GO"/>
+                            <TextBox x:Name="EnqNotesBox" Header="Notes" AcceptsReturn="True"
+                                     TextWrapping="Wrap" MinHeight="64"/>
+                            <TextBlock Text="Local enquiries" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock x:Name="EnqListText" FontFamily="Consolas" FontSize="12"
+                                       TextWrapping="Wrap"/>
+                            <Button Content="Select next" Click="SelectNextEnq_Click" MinHeight="44"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>
