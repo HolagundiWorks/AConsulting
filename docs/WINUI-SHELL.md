@@ -1,18 +1,30 @@
-# AConsulting WinUI shell (D5)
+# AConsulting WinUI shell (D5 + HCW geography)
 
-**Status:** Unpackaged WinUI 3 shell builds on VS 2022 Community · **Updated:** 2026-08-07
+**Status:** Unpackaged WinUI 3 shell · **Updated:** 2026-08-09  
+**Parity:** esti [`DESKTOP-WEB-PARITY-UX.md`](https://github.com/HolagundiWorks/aorms/blob/main/docs/esti/DESKTOP-WEB-PARITY-UX.md)
 
-## Build
+## Chrome (HCW scaffold)
 
-```bat
-build-winui.cmd
+```text
+┌─ Ribbon (Practice · Clients · Projects · People · Office · Tasks) ─┐
+├─ Stage (Fog Gray) — bridge Activate · Tasks ───────────────────────┤
+├─ ActionDock — Clear · Save local · Reload · Publish ───────────────┤
+└─ Status tray ──────────────────────────────────────────────────────┘
 ```
 
-Uses VS 2022 MSBuild (`dotnet build` alone fails on SDK 10 Appx Pri tasks).
+Practice nav labels match consultancy IA (esti AConsulting taskbar groups).  
+Materials match AStudio: Fog Gray · soft neu chrome · Radiant Orange commit · 8px.
 
-## Pin
+## Build / run
 
-- `vendor/AQC` @ `aorms-bridge-d2`
-- firm.db: `%LocalAppData%\AConsulting\firm.db`
+Same as AStudio — `build-winui.cmd` or VS 2022 F5. Env:
 
-Same activate / enqueue / Flush UI pattern as AStudio. Domain engineering UI next.
+```bat
+set ESTI_HUB_URL=http://127.0.0.1:4000
+set ESTI_LICENSE_API_URL=http://127.0.0.1:4000/platform
+set ESTI_PRODUCT_API_KEY=hlp_sk_...
+```
+
+firm.db: `%LocalAppData%\AConsulting\firm.db`
+
+MSIX = D6. Engagements · Office domain UI = next. AQC technical apps stay separate installers.
