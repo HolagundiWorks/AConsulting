@@ -10,6 +10,7 @@ namespace AConsulting.App;
 
 enum ShellModule
 {
+    Clients,
     Projects,
     Office,
     Tasks,
@@ -20,9 +21,11 @@ public sealed partial class MainWindow : Window
     readonly AormsBridge _bridge;
     readonly LocalEngagementsStore _engagements;
     readonly LocalOfficeEnquiriesStore _enquiries;
+    readonly LocalClientsStore _clients;
     ShellModule _module = ShellModule.Projects;
     string? _selectedEngagementId;
     string? _selectedEnquiryId;
+    string? _selectedClientId;
 
     public MainWindow()
     {
@@ -32,6 +35,7 @@ public sealed partial class MainWindow : Window
         var dbPath = LocalEngagementsStore.DefaultFirmDbPath();
         _engagements = new LocalEngagementsStore(dbPath);
         _enquiries = new LocalOfficeEnquiriesStore(dbPath);
+        _clients = new LocalClientsStore(dbPath);
         ShowModule(ShellModule.Projects);
         RefreshStatus("Ready.");
     }
@@ -39,10 +43,12 @@ public sealed partial class MainWindow : Window
     void ShowModule(ShellModule module)
     {
         _module = module;
+        PanelClients.Visibility = module == ShellModule.Clients ? Visibility.Visible : Visibility.Collapsed;
         PanelProjects.Visibility = module == ShellModule.Projects ? Visibility.Visible : Visibility.Collapsed;
         PanelOffice.Visibility = module == ShellModule.Office ? Visibility.Visible : Visibility.Collapsed;
         PanelTasks.Visibility = module == ShellModule.Tasks ? Visibility.Visible : Visibility.Collapsed;
 
+        StyleNav(NavClientsBtn, module == ShellModule.Clients);
         StyleNav(NavProjectsBtn, module == ShellModule.Projects);
         StyleNav(NavOfficeBtn, module == ShellModule.Office);
         StyleNav(NavTasksBtn, module == ShellModule.Tasks);
@@ -53,12 +59,14 @@ public sealed partial class MainWindow : Window
 
         DockCreateBtn.Content = module switch
         {
+            ShellModule.Clients => "Save client",
             ShellModule.Projects => "Save engagement",
             ShellModule.Office => "Save enquiry",
             _ => "Save local",
         };
         DockCommitBtn.Content = module switch
         {
+            ShellModule.Clients => "Publish client",
             ShellModule.Projects => "Publish status",
             ShellModule.Office => "Publish decision",
             _ => "Publish to hub",
@@ -67,6 +75,9 @@ public sealed partial class MainWindow : Window
 
         switch (module)
         {
+            case ShellModule.Clients:
+                ReloadClients();
+                break;
             case ShellModule.Projects:
                 ReloadEngagements();
                 break;
@@ -100,6 +111,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    void NavClients_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Clients);
     void NavProjects_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Projects);
     void NavOffice_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Office);
     void NavTasks_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Tasks);
@@ -310,6 +322,118 @@ public sealed partial class MainWindow : Window
             ShowModule(ShellModule.Projects);
     }
 
+    void ReloadClients()
+    {
+        var rows = _clients.List();
+        if (rows.Count == 0)
+        {
+            ClientListText.Text = "(empty — save a client)";
+            return;
+        }
+        ClientListText.Text = string.Join("\n", rows.Select(r =>
+        {
+            var mark = r.ClientId == _selectedClientId ? ">" : " ";
+            return $"{mark} {r.PublishState}  {r.Name}  ·  {r.Contact}  [{r.ClientId}]";
+        }));
+        if (_selectedClientId is null)
+            _selectedClientId = rows[0].ClientId;
+    }
+
+    void SelectNextClient_Click(object sender, RoutedEventArgs e)
+    {
+        var rows = _clients.List();
+        if (rows.Count == 0)
+        {
+            TrayText.Text = "No clients yet.";
+            return;
+        }
+        var idx = rows.ToList().FindIndex(r => r.ClientId == _selectedClientId);
+        idx = (idx + 1) % rows.Count;
+        _selectedClientId = rows[idx].ClientId;
+        var cur = rows[idx];
+        ClientNameBox.Text = cur.Name;
+        ClientContactBox.Text = cur.Contact;
+        ClientEmailBox.Text = cur.Email;
+        ClientNotesBox.Text = cur.Notes;
+        ReloadClients();
+        TrayText.Text = $"Selected client · {_selectedClientId}";
+    }
+
+    void SaveClient()
+    {
+        var name = ClientNameBox.Text?.Trim() ?? "";
+        if (string.IsNullOrEmpty(name))
+        {
+            TrayText.Text = "Client name required.";
+            return;
+        }
+        var existing = _selectedClientId is null ? null : _clients.Get(_selectedClientId);
+        var updating = existing is not null &&
+            string.Equals(name, existing.Name, StringComparison.Ordinal);
+        var id = updating ? existing!.ClientId : Guid.NewGuid().ToString("N")[..12];
+        var publishState = updating ? existing!.PublishState : "LOCAL";
+        _clients.Upsert(
+            id,
+            name,
+            ClientContactBox.Text?.Trim() ?? "",
+            ClientEmailBox.Text?.Trim() ?? "",
+            ClientNotesBox.Text ?? "",
+            publishState);
+        _selectedClientId = id;
+        ClientNameBox.Text = "";
+        ClientContactBox.Text = "";
+        ClientEmailBox.Text = "";
+        ClientNotesBox.Text = "";
+        ReloadClients();
+        TrayText.Text = $"Saved client {id}";
+    }
+
+    async Task PublishClientAsync()
+    {
+        var id = _selectedClientId;
+        if (id is null)
+        {
+            TrayText.Text = "No client selected — save or Select next.";
+            return;
+        }
+        var row = _clients.Get(id);
+        if (row is null)
+        {
+            TrayText.Text = "Client not found.";
+            return;
+        }
+        try
+        {
+            _bridge.EnqueueMeta("clientStatus", row.ClientId, new Dictionary<string, object?>
+            {
+                ["clientId"] = row.ClientId,
+                ["name"] = row.Name,
+                ["contact"] = row.Contact,
+                ["email"] = row.Email,
+                ["updatedAt"] = DateTime.UtcNow.ToString("O"),
+            });
+            _clients.Upsert(row.ClientId, row.Name, row.Contact, row.Email, row.Notes, "QUEUED");
+            var result = await _bridge.FlushAsync();
+            if (result.SkippedReason is not null)
+            {
+                TrayText.Text =
+                    $"Queued clientStatus; flush skipped={result.SkippedReason} — Activate first.";
+                LogText.Text = $"Flush skipped={result.SkippedReason}";
+            }
+            else
+            {
+                _clients.Upsert(row.ClientId, row.Name, row.Contact, row.Email, row.Notes, "PUBLISHED");
+                TrayText.Text = $"Published client · {row.Name}";
+                LogText.Text = $"clientStatus OK · {row.ClientId}";
+            }
+            ReloadClients();
+        }
+        catch (Exception ex)
+        {
+            TrayText.Text = $"Publish failed: {ex.Message}";
+        }
+    }
+
     void ReloadEnquiries()
     {
         var rows = _enquiries.List();
@@ -493,6 +617,12 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Clients:
+                ClientNameBox.Text = "";
+                ClientContactBox.Text = "";
+                ClientEmailBox.Text = "";
+                ClientNotesBox.Text = "";
+                break;
             case ShellModule.Projects:
                 EngTitleBox.Text = "";
                 EngCodeBox.Text = "";
@@ -516,6 +646,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Clients:
+                SaveClient();
+                break;
             case ShellModule.Projects:
                 SaveEngagement();
                 break;
@@ -532,6 +665,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Clients:
+                ReloadClients();
+                break;
             case ShellModule.Projects:
                 ReloadEngagements();
                 break;
@@ -549,6 +685,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Clients:
+                await PublishClientAsync();
+                break;
             case ShellModule.Projects:
                 await PublishEngagementStatusAsync();
                 break;

@@ -6,7 +6,7 @@
 
     <!--
       HCW geography · W3+:
-      Ribbon ≤5 · Stage = Projects · Office · Tasks · one orange commit · tray hub.
+      Ribbon ≤5 · Stage = Clients · Projects · Office · Tasks · one orange commit · tray hub.
     -->
     <Grid>
         <Grid.RowDefinitions>
@@ -30,7 +30,7 @@
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Button Content="Practice" IsEnabled="False"/>
-                    <Button Content="Clients" IsEnabled="False"/>
+                    <Button x:Name="NavClientsBtn" Content="Clients" Click="NavClients_Click"/>
                     <Button x:Name="NavProjectsBtn" Content="Projects" Click="NavProjects_Click"/>
                     <Button x:Name="NavOfficeBtn" Content="Office" Click="NavOffice_Click"/>
                     <Button x:Name="NavTasksBtn" Content="Tasks" Click="NavTasks_Click"/>
@@ -43,7 +43,30 @@
         <ScrollViewer Grid.Row="1" Background="#F2F4F7" Padding="24">
             <Grid MaxWidth="960" HorizontalAlignment="Left">
 
-                <StackPanel x:Name="PanelProjects" Spacing="16" Visibility="Visible">
+                
+                <StackPanel x:Name="PanelClients" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Clients" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
+                        <TextBlock Text="Local client directory in firm.db. Publish clientStatus meta when ready for hub portals."
+                                   Opacity="0.7" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="New client" FontWeight="SemiBold"/>
+                            <TextBox x:Name="ClientNameBox" Header="Name" PlaceholderText="Owner / developer firm"/>
+                            <TextBox x:Name="ClientContactBox" Header="Contact" PlaceholderText="Primary person"/>
+                            <TextBox x:Name="ClientEmailBox" Header="Email" PlaceholderText="ops@client.example"/>
+                            <TextBox x:Name="ClientNotesBox" Header="Notes" AcceptsReturn="True"
+                                     TextWrapping="Wrap" MinHeight="56"/>
+                            <TextBlock Text="Local clients" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                            <TextBlock x:Name="ClientListText" FontFamily="Consolas" FontSize="12"
+                                       TextWrapping="Wrap"/>
+                            <Button Content="Select next" Click="SelectNextClient_Click" MinHeight="44"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+<StackPanel x:Name="PanelProjects" Spacing="16" Visibility="Visible">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Projects · Engagements" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
                         <TextBlock Text="Local engagements in firm.db. Publish status meta to the hub; import from AORMS Connect catalog."
