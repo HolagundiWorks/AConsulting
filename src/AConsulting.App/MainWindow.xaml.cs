@@ -10,6 +10,7 @@ namespace AConsulting.App;
 
 enum ShellModule
 {
+    Practice,
     Clients,
     Projects,
     Office,
@@ -22,6 +23,7 @@ public sealed partial class MainWindow : Window
     readonly LocalEngagementsStore _engagements;
     readonly LocalOfficeEnquiriesStore _enquiries;
     readonly LocalClientsStore _clients;
+    readonly LocalPracticeStore _practice;
     ShellModule _module = ShellModule.Projects;
     string? _selectedEngagementId;
     string? _selectedEnquiryId;
@@ -36,6 +38,7 @@ public sealed partial class MainWindow : Window
         _engagements = new LocalEngagementsStore(dbPath);
         _enquiries = new LocalOfficeEnquiriesStore(dbPath);
         _clients = new LocalClientsStore(dbPath);
+        _practice = new LocalPracticeStore(dbPath);
         ShowModule(ShellModule.Projects);
         RefreshStatus("Ready.");
     }
@@ -43,11 +46,13 @@ public sealed partial class MainWindow : Window
     void ShowModule(ShellModule module)
     {
         _module = module;
+        PanelPractice.Visibility = module == ShellModule.Practice ? Visibility.Visible : Visibility.Collapsed;
         PanelClients.Visibility = module == ShellModule.Clients ? Visibility.Visible : Visibility.Collapsed;
         PanelProjects.Visibility = module == ShellModule.Projects ? Visibility.Visible : Visibility.Collapsed;
         PanelOffice.Visibility = module == ShellModule.Office ? Visibility.Visible : Visibility.Collapsed;
         PanelTasks.Visibility = module == ShellModule.Tasks ? Visibility.Visible : Visibility.Collapsed;
 
+        StyleNav(NavPracticeBtn, module == ShellModule.Practice);
         StyleNav(NavClientsBtn, module == ShellModule.Clients);
         StyleNav(NavProjectsBtn, module == ShellModule.Projects);
         StyleNav(NavOfficeBtn, module == ShellModule.Office);
@@ -59,6 +64,7 @@ public sealed partial class MainWindow : Window
 
         DockCreateBtn.Content = module switch
         {
+            ShellModule.Practice => "Save notes",
             ShellModule.Clients => "Save client",
             ShellModule.Projects => "Save engagement",
             ShellModule.Office => "Save enquiry",
@@ -66,6 +72,7 @@ public sealed partial class MainWindow : Window
         };
         DockCommitBtn.Content = module switch
         {
+            ShellModule.Practice => "Flush meta",
             ShellModule.Clients => "Publish client",
             ShellModule.Projects => "Publish status",
             ShellModule.Office => "Publish decision",
@@ -75,6 +82,9 @@ public sealed partial class MainWindow : Window
 
         switch (module)
         {
+            case ShellModule.Practice:
+                LoadPractice();
+                break;
             case ShellModule.Clients:
                 ReloadClients();
                 break;
@@ -111,6 +121,7 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    void NavPractice_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Practice);
     void NavClients_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Clients);
     void NavProjects_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Projects);
     void NavOffice_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Office);
@@ -320,6 +331,34 @@ public sealed partial class MainWindow : Window
         LogText.Text = status;
         if (_module != ShellModule.Projects)
             ShowModule(ShellModule.Projects);
+    }
+
+    void LoadPractice()
+    {
+        var cfg = _bridge.HubConfigured();
+        var eng = _engagements.List();
+        var clients = _clients.List();
+        var enqs = _enquiries.List();
+        var tasks = _bridge.Db.ListLocalTasks();
+        var go = enqs.Count(e => e.Decision == "GO");
+        var noGo = enqs.Count(e => e.Decision == "NO_GO");
+        var draft = enqs.Count(e => e.Decision == "DRAFT");
+        PracticeCountsText.Text =
+            $"clients={clients.Count}  engagements={eng.Count}  " +
+            $"enquiries={enqs.Count} (GO={go} NO_GO={noGo} DRAFT={draft})  tasks={tasks.Count}";
+        PracticeHubText.Text =
+            $"syncReady={cfg.SyncReady}  hasSyncToken={cfg.HasSyncToken}  hub={cfg.HubUrl}";
+        var profile = _practice.Get();
+        PracticeFirmBox.Text = profile.FirmName;
+        PracticeNotesBox.Text = profile.Notes;
+        RefreshStatus();
+    }
+
+    void SavePracticeNotes()
+    {
+        _practice.Upsert(PracticeFirmBox.Text?.Trim() ?? "", PracticeNotesBox.Text ?? "");
+        LoadPractice();
+        TrayText.Text = "Practice notes saved locally.";
     }
 
     void ReloadClients()
@@ -617,6 +656,10 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Practice:
+                PracticeFirmBox.Text = "";
+                PracticeNotesBox.Text = "";
+                break;
             case ShellModule.Clients:
                 ClientNameBox.Text = "";
                 ClientContactBox.Text = "";
@@ -646,6 +689,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Practice:
+                SavePracticeNotes();
+                break;
             case ShellModule.Clients:
                 SaveClient();
                 break;
@@ -665,6 +711,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Practice:
+                LoadPractice();
+                break;
             case ShellModule.Clients:
                 ReloadClients();
                 break;
@@ -685,6 +734,9 @@ public sealed partial class MainWindow : Window
     {
         switch (_module)
         {
+            case ShellModule.Practice:
+                Flush_Click(sender, e);
+                break;
             case ShellModule.Clients:
                 await PublishClientAsync();
                 break;

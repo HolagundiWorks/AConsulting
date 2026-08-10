@@ -6,7 +6,7 @@
 
     <!--
       HCW geography · W3+:
-      Ribbon ≤5 · Stage = Clients · Projects · Office · Tasks · one orange commit · tray hub.
+      Ribbon ≤5 · Stage = Practice · Clients · Projects · Office · Tasks · one orange Flush.
     -->
     <Grid>
         <Grid.RowDefinitions>
@@ -29,7 +29,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
                             HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button Content="Practice" IsEnabled="False"/>
+                    <Button x:Name="NavPracticeBtn" Content="Practice" Click="NavPractice_Click"/>
                     <Button x:Name="NavClientsBtn" Content="Clients" Click="NavClients_Click"/>
                     <Button x:Name="NavProjectsBtn" Content="Projects" Click="NavProjects_Click"/>
                     <Button x:Name="NavOfficeBtn" Content="Office" Click="NavOffice_Click"/>
@@ -43,7 +43,35 @@
         <ScrollViewer Grid.Row="1" Background="#F2F4F7" Padding="24">
             <Grid MaxWidth="960" HorizontalAlignment="Left">
 
-                
+                <StackPanel x:Name="PanelPractice" Spacing="16" Visibility="Collapsed">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Practice" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
+                        <TextBlock Text="Local capacity snapshot + firm notes. Hub Activate / Flush also live in the tray."
+                                   Opacity="0.7" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Local capacity" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PracticeCountsText" FontFamily="Consolas" FontSize="12"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Name="PracticeHubText" FontFamily="Consolas" FontSize="12"
+                                       Opacity="0.8" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
+                            BorderBrush="#D0D4DC" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Firm profile" FontWeight="SemiBold"/>
+                            <TextBox x:Name="PracticeFirmBox" Header="Firm name" PlaceholderText="Consulting practice"/>
+                            <TextBox x:Name="PracticeNotesBox" Header="Practice notes" AcceptsReturn="True"
+                                     TextWrapping="Wrap" MinHeight="80"/>
+                            <TextBlock Text="Dock: Save notes · Flush meta (orange) pushes the outbox. Deep KPIs land with Studio Intelligence later."
+                                       Opacity="0.55" FontSize="12" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
                 <StackPanel x:Name="PanelClients" Spacing="16" Visibility="Collapsed">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Clients" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
