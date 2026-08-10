@@ -8,7 +8,6 @@
 ```text
 ┌─ Ribbon (Practice · Clients · Projects · Office · Tasks) ─┐
 ├─ Stage — capacity / notes | clients | engagements | … ───┤
-├─ ActionDock — Clear · [Import] · Save · Reload · Publish ─� notes | clients | engagements | … ───┤
 ├─ ActionDock — Clear · [Import] · Save · Reload · Publish ─┤
 └─ Status tray · hub + licence ─────────────────────────────┘
 ```
