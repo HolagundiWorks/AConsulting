@@ -24,10 +24,12 @@ public sealed partial class MainWindow : Window
     readonly LocalOfficeEnquiriesStore _enquiries;
     readonly LocalClientsStore _clients;
     readonly LocalPracticeStore _practice;
+    readonly EstiOllamaClient _esti;
     ShellModule _module = ShellModule.Projects;
     string? _selectedEngagementId;
     string? _selectedEnquiryId;
     string? _selectedClientId;
+    bool _estiBusy;
 
     public MainWindow()
     {
@@ -39,8 +41,10 @@ public sealed partial class MainWindow : Window
         _enquiries = new LocalOfficeEnquiriesStore(dbPath);
         _clients = new LocalClientsStore(dbPath);
         _practice = new LocalPracticeStore(dbPath);
+        _esti = new EstiOllamaClient();
         ShowModule(ShellModule.Projects);
         RefreshStatus("Ready.");
+        _ = ProbeOllamaQuietAsync();
     }
 
     void ShowModule(ShellModule module)
@@ -84,6 +88,7 @@ public sealed partial class MainWindow : Window
         {
             case ShellModule.Practice:
                 LoadPractice();
+                _ = ProbeOllamaQuietAsync();
                 break;
             case ShellModule.Clients:
                 ReloadClients();
@@ -360,6 +365,85 @@ public sealed partial class MainWindow : Window
         LoadPractice();
         TrayText.Text = "Practice notes saved locally.";
     }
+
+    async Task ProbeOllamaQuietAsync()
+    {
+        var probe = await _esti.ProbeAsync();
+        EstiStatusText.Text = $"{probe.Note} · {_esti.BaseUrl}";
+        LocalAiBadge.Text = probe.Reachable
+            ? $"Local AI · {_esti.Model}"
+            : "Local AI · offline";
+        LocalAiBadge.Opacity = probe.Reachable ? 0.85 : 0.45;
+    }
+
+    async void ProbeOllama_Click(object sender, RoutedEventArgs e)
+    {
+        if (_estiBusy) return;
+        _estiBusy = true;
+        try
+        {
+            EstiStatusText.Text = "Probing Ollama…";
+            var probe = await _esti.ProbeAsync();
+            EstiStatusText.Text = $"{probe.Note} · {_esti.BaseUrl}";
+            LocalAiBadge.Text = probe.Reachable
+                ? $"Local AI · {_esti.Model}"
+                : "Local AI · offline";
+            LocalAiBadge.Opacity = probe.Reachable ? 0.85 : 0.45;
+            TrayText.Text = probe.Reachable ? "Ollama reachable" : "Ollama offline";
+            LogText.Text = probe.Note;
+        }
+        finally
+        {
+            _estiBusy = false;
+        }
+    }
+
+    async void AskEsti_Click(object sender, RoutedEventArgs e)
+    {
+        if (_estiBusy) return;
+        var q = EstiPromptBox.Text?.Trim() ?? "";
+        if (string.IsNullOrEmpty(q))
+        {
+            TrayText.Text = "Enter a question for ESTI.";
+            return;
+        }
+        _estiBusy = true;
+        try
+        {
+            EstiReplyText.Text = "Asking local Ollama…";
+            TrayText.Text = "ESTI thinking…";
+            var result = await _esti.AskAsync(q, BuildEstiContext());
+            EstiReplyText.Text = result.Ok ? result.Reply : result.Note;
+            TrayText.Text = result.Ok ? "ESTI reply ready (local only)" : "ESTI ask failed";
+            LogText.Text = result.Note;
+        }
+        finally
+        {
+            _estiBusy = false;
+        }
+    }
+
+    string BuildEstiContext()
+    {
+        var profile = _practice.Get();
+        var eng = _engagements.List();
+        var clients = _clients.List();
+        var enqs = _enquiries.List();
+        var go = enqs.Count(e => e.Decision == "GO");
+        var noGo = enqs.Count(e => e.Decision == "NO_GO");
+        var draft = enqs.Count(e => e.Decision == "DRAFT");
+        var selected = _selectedEngagementId is null ? null : _engagements.Get(_selectedEngagementId);
+        var engLine = selected is null
+            ? "No engagement selected."
+            : $"Selected engagement: {selected.Code} · {selected.Title} · {selected.Status}/{selected.Stage} · {selected.Discipline}";
+        return
+            $"firm={profile.FirmName}\nnotes={TrimCtx(profile.Notes, 160)}\n" +
+            $"counts: clients={clients.Count} engagements={eng.Count} " +
+            $"enquiries GO={go} NO_GO={noGo} DRAFT={draft}\n{engLine}";
+    }
+
+    static string TrimCtx(string s, int max) =>
+        string.IsNullOrEmpty(s) ? "" : s.Length <= max ? s : s[..max] + "…";
 
     void ReloadClients()
     {
@@ -659,6 +743,8 @@ public sealed partial class MainWindow : Window
             case ShellModule.Practice:
                 PracticeFirmBox.Text = "";
                 PracticeNotesBox.Text = "";
+                EstiPromptBox.Text = "";
+                EstiReplyText.Text = "";
                 break;
             case ShellModule.Clients:
                 ClientNameBox.Text = "";
