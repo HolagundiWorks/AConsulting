@@ -5,6 +5,8 @@ using Aorms.Bridge;
 using AConsulting.App.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace AConsulting.App;
 
@@ -43,8 +45,32 @@ public sealed partial class MainWindow : Window
         _practice = new LocalPracticeStore(dbPath);
         _esti = new EstiOllamaClient();
         ShowModule(ShellModule.Projects);
-        RefreshStatus("Ready.");
+        ApplyConnectLicenceStatus();
         _ = ProbeOllamaQuietAsync();
+    }
+
+    /// <summary>
+    /// Licence SSO from AORMS Connect session.json — never Activate in AConsulting.
+    /// </summary>
+    void ApplyConnectLicenceStatus()
+    {
+        _bridge.TryImportConnectSession(overwrite: true);
+        var cfg = _bridge.HubConfigured();
+        LicenceChipText.Text = cfg.HasSyncToken ? "Licensed · Connect" : "Unbound · Connect";
+        RefreshStatus(
+            cfg.HasSyncToken
+                ? $"Licence from Connect · {cfg.HubUrl}"
+                : "Unbound — Activate licence in AORMS Connect, then Re-import.");
+    }
+
+    void ReimportConnectSession_Click(object sender, RoutedEventArgs e)
+    {
+        var imported = _bridge.TryImportConnectSession(overwrite: true);
+        ApplyConnectLicenceStatus();
+        RefreshStatus(
+            imported
+                ? "Imported Connect session.json into AConsulting firm.db."
+                : "No Connect session.json — Activate in AORMS Connect first.");
     }
 
     void ShowModule(ShellModule module)
@@ -108,22 +134,16 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    /// <summary>Web navSx peer — transparent + 2px accent underline (not orange fill).</summary>
     static void StyleNav(Button btn, bool active)
     {
-        if (active)
-        {
-            btn.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 0xFF, 0x4F, 0x18));
-            btn.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 255, 255, 255));
-        }
-        else
-        {
-            btn.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(0, 0, 0, 0));
-            btn.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 0x14, 0x15, 0x17));
-        }
+        var accent = new SolidColorBrush(Color.FromArgb(255, 0xFF, 0x4F, 0x18));
+        var muted = new SolidColorBrush(Color.FromArgb(255, 0x5C, 0x63, 0x70));
+        var transparent = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+        btn.Background = transparent;
+        btn.BorderThickness = new Thickness(0, 0, 0, 2);
+        btn.BorderBrush = active ? accent : transparent;
+        btn.Foreground = active ? accent : muted;
     }
 
     void NavPractice_Click(object sender, RoutedEventArgs e) => ShowModule(ShellModule.Practice);
@@ -142,27 +162,7 @@ public sealed partial class MainWindow : Window
             LogText.Text = note;
     }
 
-    void Refresh_Click(object sender, RoutedEventArgs e) => RefreshStatus("Status refreshed.");
-
-    async void Activate_Click(object sender, RoutedEventArgs e)
-    {
-        var key = LicenseKeyBox.Text?.Trim() ?? "";
-        if (string.IsNullOrEmpty(key))
-        {
-            RefreshStatus("Enter a licence key first.");
-            return;
-        }
-        try
-        {
-            LogText.Text = "Activating…";
-            var grant = await _bridge.ActivateAsync(key);
-            RefreshStatus($"Activate OK · syncToken length={grant.SyncToken?.Length ?? 0}");
-        }
-        catch (Exception ex)
-        {
-            RefreshStatus($"Activate failed: {ex.Message}");
-        }
-    }
+    void Refresh_Click(object sender, RoutedEventArgs e) => ApplyConnectLicenceStatus();
 
     async void Flush_Click(object sender, RoutedEventArgs e)
     {
@@ -273,7 +273,7 @@ public sealed partial class MainWindow : Window
             if (result.SkippedReason is not null)
             {
                 TrayText.Text =
-                    $"Queued engagementStatus for {e.Code}; flush skipped={result.SkippedReason} — Activate first.";
+                    $"Queued engagementStatus for {e.Code}; flush skipped={result.SkippedReason} — Activate in AORMS Connect first.";
                 LogText.Text = $"Flush skipped={result.SkippedReason}";
             }
             else
@@ -540,7 +540,7 @@ public sealed partial class MainWindow : Window
             if (result.SkippedReason is not null)
             {
                 TrayText.Text =
-                    $"Queued clientStatus; flush skipped={result.SkippedReason} — Activate first.";
+                    $"Queued clientStatus; flush skipped={result.SkippedReason} — Activate in AORMS Connect first.";
                 LogText.Text = $"Flush skipped={result.SkippedReason}";
             }
             else
@@ -665,7 +665,7 @@ public sealed partial class MainWindow : Window
             if (result.SkippedReason is not null)
             {
                 TrayText.Text =
-                    $"Queued officeEnquiry; flush skipped={result.SkippedReason} — Activate first.";
+                    $"Queued officeEnquiry; flush skipped={result.SkippedReason} — Activate in AORMS Connect first.";
                 LogText.Text = $"Flush skipped={result.SkippedReason}";
             }
             else

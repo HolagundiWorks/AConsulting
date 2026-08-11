@@ -11,7 +11,9 @@ via `Aorms.Bridge.Smoke` (`ESTI_LICENSE_KEY` path).
 
 ## Auth
 
-- `POST /platform/v1/activate` → `licenseToken` + **`syncToken`** (required)  
+- **Activate only in AORMS Connect** → writes `%LocalAppData%\AORMS-Connect\session.json`  
+- AConsulting imports via `AormsBridge.TryImportConnectSession` (no HLP Activate UI here)  
+- Hub: `POST /platform/v1/activate` → `licenseToken` + **`syncToken`** (required)  
 - Sync calls: `Authorization: Bearer <syncToken>`
 
 ## Endpoints

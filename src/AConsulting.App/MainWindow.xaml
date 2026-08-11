@@ -5,239 +5,289 @@
     Title="AConsulting">
 
     <!--
-      HCW geography · W3+:
-      Ribbon ≤5 · Stage = Practice · Clients · Projects · Office · Tasks · one orange Flush.
+      HCW geography · DESKTOP-WINUI-UX.md (manager full shell):
+      Floating ribbon 56 · Fog stage · ActionDock · taskbar 60 · density 1×.
+      Module nav in taskbar (not ribbon).
     -->
-    <Grid>
+    <Grid Background="{StaticResource HcwFogBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="56"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="64"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#ECEEF2" Padding="16,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <TextBlock Text="AConsulting" FontSize="18" FontWeight="SemiBold" Foreground="#141517"/>
-                    <TextBlock Text="Accelerated Consulting" Opacity="0.65" VerticalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                            HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button x:Name="NavPracticeBtn" Content="Practice" Click="NavPractice_Click"/>
-                    <Button x:Name="NavClientsBtn" Content="Clients" Click="NavClients_Click"/>
-                    <Button x:Name="NavProjectsBtn" Content="Projects" Click="NavProjects_Click"/>
-                    <Button x:Name="NavOfficeBtn" Content="Office" Click="NavOffice_Click"/>
-                    <Button x:Name="NavTasksBtn" Content="Tasks" Click="NavTasks_Click"/>
-                </StackPanel>
-                <TextBlock x:Name="LocalAiBadge" Text="Local AI · desktop" Opacity="0.55"
-                           VerticalAlignment="Center" FontSize="12"/>
-            </Grid>
-        </Border>
-
-        <ScrollViewer Grid.Row="1" Background="#F2F4F7" Padding="24">
-            <Grid MaxWidth="960" HorizontalAlignment="Left">
-
-                <StackPanel x:Name="PanelPractice" Spacing="16" Visibility="Collapsed">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Practice" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                        <TextBlock Text="Capacity · firm notes · Ask ESTI on local Ollama (never the cloud hub)."
-                                   Opacity="0.7" TextWrapping="Wrap"/>
+        <!-- TOP RIBBON — brand · Local AI (modules live in taskbar) -->
+        <Grid Grid.Row="0" Height="56" Margin="16,16,16,8">
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}">
+                <Grid Padding="16,0" Height="56">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <TextBlock Text="AConsulting" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   FontFamily="{StaticResource HcwFontFamily}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Accelerated Consulting" Opacity="0.55" FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource HcwInkBrush}"/>
                     </StackPanel>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Local capacity" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="PracticeCountsText" FontFamily="Consolas" FontSize="12"
-                                       TextWrapping="Wrap"/>
-                            <TextBlock x:Name="PracticeHubText" FontFamily="Consolas" FontSize="12"
-                                       Opacity="0.8" TextWrapping="Wrap"/>
+                    <Grid Grid.Column="2" Height="35" VerticalAlignment="Center">
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="3,3,0,0"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,3,3"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="10,0">
+                            <TextBlock x:Name="LocalAiBadge" Text="Local AI · desktop"
+                                       Style="{StaticResource HcwLabel}" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer Background="{StaticResource HcwFogBrush}"
+                          Padding="24,24,24,180"
+                          VerticalScrollBarVisibility="Auto">
+                <Grid HorizontalAlignment="Stretch">
+
+                    <StackPanel x:Name="PanelPractice" Spacing="16" Visibility="Collapsed">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Practice" Style="{StaticResource HcwTitleText}"/>
+                            <TextBlock Text="Capacity · firm notes · Ask ESTI on local Ollama (never the cloud hub)."
+                                       Style="{StaticResource HcwBodyMuted}"/>
                         </StackPanel>
-                    </Border>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Ask ESTI · local" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="EstiStatusText"
-                                       Text="Probe Ollama to check local runtime."
-                                       Opacity="0.75" TextWrapping="Wrap" FontSize="12"/>
-                            <TextBox x:Name="EstiPromptBox" Header="Question"
-                                     PlaceholderText="What should we decide on open GO enquiries?"
-                                     AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64"/>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Button Content="Ask ESTI" Click="AskEsti_Click" MinHeight="44" MinWidth="120"
-                                        Background="#FF4F18" Foreground="White"/>
-                                <Button Content="Probe Ollama" Click="ProbeOllama_Click" MinHeight="44"/>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Local capacity" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="PracticeCountsText" FontFamily="Consolas" FontSize="12"
+                                           TextWrapping="Wrap" Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="PracticeHubText" FontFamily="Consolas" FontSize="12"
+                                           Opacity="0.8" TextWrapping="Wrap"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
                             </StackPanel>
-                            <TextBlock x:Name="EstiReplyText" TextWrapping="Wrap"
-                                       FontSize="13" Opacity="0.9"/>
-                            <TextBlock Text="Transcripts stay on this machine — never synced. Env: ESTI_OLLAMA_URL · ESTI_OLLAMA_MODEL."
-                                       Opacity="0.55" FontSize="12" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Firm profile" FontWeight="SemiBold"/>
-                            <TextBox x:Name="PracticeFirmBox" Header="Firm name" PlaceholderText="Consulting practice"/>
-                            <TextBox x:Name="PracticeNotesBox" Header="Practice notes" AcceptsReturn="True"
-                                     TextWrapping="Wrap" MinHeight="80"/>
-                            <TextBlock Text="Dock: Save notes · Flush meta (orange). Hub Activate / Flush also in the tray."
-                                       Opacity="0.55" FontSize="12" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <StackPanel x:Name="PanelClients" Spacing="16" Visibility="Collapsed">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Clients" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                        <TextBlock Text="Local client directory in firm.db. Publish clientStatus meta when ready for hub portals."
-                                   Opacity="0.7" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="New client" FontWeight="SemiBold"/>
-                            <TextBox x:Name="ClientNameBox" Header="Name" PlaceholderText="Owner / developer firm"/>
-                            <TextBox x:Name="ClientContactBox" Header="Contact" PlaceholderText="Primary person"/>
-                            <TextBox x:Name="ClientEmailBox" Header="Email" PlaceholderText="ops@client.example"/>
-                            <TextBox x:Name="ClientNotesBox" Header="Notes" AcceptsReturn="True"
-                                     TextWrapping="Wrap" MinHeight="56"/>
-                            <TextBlock Text="Local clients" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <TextBlock x:Name="ClientListText" FontFamily="Consolas" FontSize="12"
-                                       TextWrapping="Wrap"/>
-                            <Button Content="Select next" Click="SelectNextClient_Click" MinHeight="44"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-<StackPanel x:Name="PanelProjects" Spacing="16" Visibility="Visible">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Projects · Engagements" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                        <TextBlock Text="Local engagements in firm.db. Publish status meta to the hub; import from AORMS Connect catalog."
-                                   Opacity="0.7" TextWrapping="Wrap"/>
+                        </Border>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Ask ESTI · local" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="EstiStatusText"
+                                           Text="Probe Ollama to check local runtime."
+                                           Style="{StaticResource HcwBodyMuted}" FontSize="12"/>
+                                <TextBox x:Name="EstiPromptBox" Header="Question"
+                                         PlaceholderText="What should we decide on open GO enquiries?"
+                                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button Content="Ask ESTI" Click="AskEsti_Click" Style="{StaticResource HcwPrimaryButton}"
+                                            MinWidth="120"/>
+                                    <Button Content="Probe Ollama" Click="ProbeOllama_Click" Style="{StaticResource HcwDockButton}"/>
+                                </StackPanel>
+                                <TextBlock x:Name="EstiReplyText" TextWrapping="Wrap" FontSize="13"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock Text="Transcripts stay on this machine — never synced. Env: ESTI_OLLAMA_URL · ESTI_OLLAMA_MODEL."
+                                           Style="{StaticResource HcwLabel}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Firm profile" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBox x:Name="PracticeFirmBox" Header="Firm name" PlaceholderText="Consulting practice"/>
+                                <TextBox x:Name="PracticeNotesBox" Header="Practice notes" AcceptsReturn="True"
+                                         TextWrapping="Wrap" MinHeight="80"/>
+                                <TextBlock Text="Dock: Save notes · Flush meta. Licence from AORMS Connect; Flush on taskbar."
+                                           Style="{StaticResource HcwLabel}"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="10">
-                            <TextBlock Text="AORMS Connect" FontWeight="SemiBold"/>
-                            <TextBlock Text="Pull catalog projects into engagements (idempotent on id)."
-                                       Opacity="0.7" TextWrapping="Wrap"/>
-                            <Button x:Name="ImportConnectBtn" Content="Import from Connect"
-                                    Click="ImportCatalog_Click" MinHeight="44" MinWidth="180"/>
-                            <TextBlock x:Name="CatalogImportNote" TextWrapping="Wrap" FontSize="12"
-                                       Opacity="0.75"
-                                       Text="No import yet — run AORMS Connect, then Import from Connect."/>
+                    <StackPanel x:Name="PanelClients" Spacing="16" Visibility="Collapsed">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Clients" Style="{StaticResource HcwTitleText}"/>
+                            <TextBlock Text="Local client directory in firm.db. Publish clientStatus meta when ready for hub portals."
+                                       Style="{StaticResource HcwBodyMuted}"/>
                         </StackPanel>
-                    </Border>
-
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="New engagement" FontWeight="SemiBold"/>
-                            <TextBox x:Name="EngTitleBox" Header="Title" PlaceholderText="Structural PE · Tower A"/>
-                            <TextBox x:Name="EngCodeBox" Header="Code / job #" PlaceholderText="ACE-2026-001"/>
-                            <TextBox x:Name="EngStageBox" Header="Stage" PlaceholderText="Enquiry / Award / Delivery"/>
-                            <TextBox x:Name="EngDisciplineBox" Header="Discipline" PlaceholderText="Structural / MEP"/>
-                            <TextBlock Text="Local engagements" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <TextBlock x:Name="EngListText" FontFamily="Consolas" FontSize="12"
-                                       TextWrapping="Wrap"/>
-                            <Button Content="Select next" Click="SelectNextEng_Click" MinHeight="44"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-
-                <StackPanel x:Name="PanelOffice" Spacing="16" Visibility="Collapsed">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Office · Enquiries" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                        <TextBlock Text="Go / no-go enquiry register in firm.db. Publish decision meta to the hub."
-                                   Opacity="0.7" TextWrapping="Wrap"/>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="New client" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBox x:Name="ClientNameBox" Header="Name" PlaceholderText="Owner / developer firm"/>
+                                <TextBox x:Name="ClientContactBox" Header="Contact" PlaceholderText="Primary person"/>
+                                <TextBox x:Name="ClientEmailBox" Header="Email" PlaceholderText="ops@client.example"/>
+                                <TextBox x:Name="ClientNotesBox" Header="Notes" AcceptsReturn="True"
+                                         TextWrapping="Wrap" MinHeight="56"/>
+                                <TextBlock Text="Local clients" FontWeight="SemiBold" Margin="0,8,0,0"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="ClientListText" FontFamily="Consolas" FontSize="12"
+                                           TextWrapping="Wrap" Foreground="{StaticResource HcwInkBrush}"/>
+                                <Button Content="Select next" Click="SelectNextClient_Click" Style="{StaticResource HcwDockButton}"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="New enquiry" FontWeight="SemiBold"/>
-                            <TextBox x:Name="EnqSubjectBox" Header="Subject" PlaceholderText="Peer review · hospital block"/>
-                            <TextBox x:Name="EnqClientBox" Header="Client / owner" PlaceholderText="Firm or developer"/>
-                            <TextBox x:Name="EnqDecisionBox" Header="Decision" PlaceholderText="DRAFT · GO · NO_GO"/>
-                            <TextBox x:Name="EnqNotesBox" Header="Notes" AcceptsReturn="True"
-                                     TextWrapping="Wrap" MinHeight="64"/>
-                            <TextBlock Text="Local enquiries" FontWeight="SemiBold" Margin="0,8,0,0"/>
-                            <TextBlock x:Name="EnqListText" FontFamily="Consolas" FontSize="12"
-                                       TextWrapping="Wrap"/>
-                            <Button Content="Select next" Click="SelectNextEnq_Click" MinHeight="44"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
 
-                <StackPanel x:Name="PanelTasks" Spacing="16" Visibility="Collapsed">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Tasks" FontSize="22" FontWeight="SemiBold" Foreground="#141517"/>
-                        <TextBlock Text="Create locally, then publish once. Hub sync and licence live in the tray below."
-                                   Opacity="0.7" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <Border Padding="16" CornerRadius="8" Background="#FFFFFF"
-                            BorderBrush="#D0D4DC" BorderThickness="1">
-                        <StackPanel Spacing="8">
-                            <TextBlock Text="Task board" FontWeight="SemiBold"/>
-                            <TextBox x:Name="TaskTitleBox" Header="Title" PlaceholderText="Task title"/>
-                            <TextBox x:Name="TaskProjectBox" Header="Engagement / project id (UUID)"
-                                     PlaceholderText="Uses selected engagement when set"/>
-                            <TextBlock x:Name="TaskListText" FontFamily="Consolas" FontSize="12"
-                                       TextWrapping="Wrap"/>
+                    <StackPanel x:Name="PanelProjects" Spacing="16" Visibility="Visible">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Projects · Engagements" Style="{StaticResource HcwTitleText}"/>
+                            <TextBlock Text="Local engagements in firm.db. Publish status meta to the hub; import from AORMS Connect catalog."
+                                       Style="{StaticResource HcwBodyMuted}"/>
                         </StackPanel>
-                    </Border>
-                    <TextBlock Text="Technical calc lives in AQC Estimation / BBS / PM. Launch from AORMS Connect."
-                               Opacity="0.55" TextWrapping="Wrap" FontSize="12"/>
-                </StackPanel>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="AORMS Connect" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock Text="Pull catalog projects into engagements (idempotent on id)."
+                                           Style="{StaticResource HcwBodyMuted}"/>
+                                <Button x:Name="ImportConnectBtn" Content="Import from Connect"
+                                        Click="ImportCatalog_Click" Style="{StaticResource HcwDockButton}" MinWidth="180"/>
+                                <TextBlock x:Name="CatalogImportNote" TextWrapping="Wrap" FontSize="12"
+                                           Opacity="0.75" Foreground="{StaticResource HcwInkBrush}"
+                                           Text="No import yet — run AORMS Connect, then Import from Connect."/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="New engagement" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBox x:Name="EngTitleBox" Header="Title" PlaceholderText="Structural PE · Tower A"/>
+                                <TextBox x:Name="EngCodeBox" Header="Code / job #" PlaceholderText="ACE-2026-001"/>
+                                <TextBox x:Name="EngStageBox" Header="Stage" PlaceholderText="Enquiry / Award / Delivery"/>
+                                <TextBox x:Name="EngDisciplineBox" Header="Discipline" PlaceholderText="Structural / MEP"/>
+                                <TextBlock Text="Local engagements" FontWeight="SemiBold" Margin="0,8,0,0"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="EngListText" FontFamily="Consolas" FontSize="12"
+                                           TextWrapping="Wrap" Foreground="{StaticResource HcwInkBrush}"/>
+                                <Button Content="Select next" Click="SelectNextEng_Click" Style="{StaticResource HcwDockButton}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel x:Name="PanelOffice" Spacing="16" Visibility="Collapsed">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Office · Enquiries" Style="{StaticResource HcwTitleText}"/>
+                            <TextBlock Text="Go / no-go enquiry register in firm.db. Publish decision meta to the hub."
+                                       Style="{StaticResource HcwBodyMuted}"/>
+                        </StackPanel>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="New enquiry" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBox x:Name="EnqSubjectBox" Header="Subject" PlaceholderText="Peer review · hospital block"/>
+                                <TextBox x:Name="EnqClientBox" Header="Client / owner" PlaceholderText="Firm or developer"/>
+                                <TextBox x:Name="EnqDecisionBox" Header="Decision" PlaceholderText="DRAFT · GO · NO_GO"/>
+                                <TextBox x:Name="EnqNotesBox" Header="Notes" AcceptsReturn="True"
+                                         TextWrapping="Wrap" MinHeight="64"/>
+                                <TextBlock Text="Local enquiries" FontWeight="SemiBold" Margin="0,8,0,0"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBlock x:Name="EnqListText" FontFamily="Consolas" FontSize="12"
+                                           TextWrapping="Wrap" Foreground="{StaticResource HcwInkBrush}"/>
+                                <Button Content="Select next" Click="SelectNextEnq_Click" Style="{StaticResource HcwDockButton}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel x:Name="PanelTasks" Spacing="16" Visibility="Collapsed">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Tasks" Style="{StaticResource HcwTitleText}"/>
+                            <TextBlock Text="Create locally, then publish once. Hub sync and licence live in the taskbar."
+                                       Style="{StaticResource HcwBodyMuted}"/>
+                        </StackPanel>
+                        <Border Style="{StaticResource HcwFlatCard}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Task board" FontWeight="SemiBold"
+                                           Foreground="{StaticResource HcwInkBrush}"/>
+                                <TextBox x:Name="TaskTitleBox" Header="Title" PlaceholderText="Task title"/>
+                                <TextBox x:Name="TaskProjectBox" Header="Engagement / project id (UUID)"
+                                         PlaceholderText="Uses selected engagement when set"/>
+                                <TextBlock x:Name="TaskListText" FontFamily="Consolas" FontSize="12"
+                                           TextWrapping="Wrap" Foreground="{StaticResource HcwInkBrush}"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="Technical calc lives in AQC Estimation / BBS / PM. Launch from AORMS Connect."
+                                   Style="{StaticResource HcwLabel}"/>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- ActionDock — LEFT destroy · CENTER save · RIGHT reload/publish -->
+            <Grid VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="16,0,16,92">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="5,5,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,5,5"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="12,8">
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Clear" Click="ClearForm_Click" Style="{StaticResource HcwDockDanger}"/>
+                            <Button x:Name="DockImportBtn" Content="Import" Click="ImportCatalog_Click"
+                                    Style="{StaticResource HcwDockButton}" Visibility="Visible"/>
+                        </StackPanel>
+                        <Border Style="{StaticResource HcwDockGroove}"/>
+                        <Button x:Name="DockCreateBtn" Content="Save" Click="DockCreate_Click"
+                                Style="{StaticResource HcwDockPrimary}" MinWidth="140"/>
+                        <Border Style="{StaticResource HcwDockGroove}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="DockReloadBtn" Content="Reload" Click="DockReload_Click"
+                                    Style="{StaticResource HcwDockButton}"/>
+                            <Button x:Name="DockCommitBtn" Content="Publish" Click="DockCommit_Click"
+                                    Style="{StaticResource HcwDockPrimary}" MinWidth="120"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
-        </ScrollViewer>
 
-        <Border Grid.Row="2" Background="#ECEEF2" Padding="16,8" BorderBrush="#D0D4DC" BorderThickness="0,1,0,0">
-            <Grid MaxWidth="960">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button Content="Clear form" Click="ClearForm_Click" MinHeight="44"/>
-                    <Button x:Name="DockImportBtn" Content="Import from Connect"
-                            Click="ImportCatalog_Click" MinHeight="44" Visibility="Visible"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button x:Name="DockCreateBtn" Content="Save engagement" Click="DockCreate_Click"
-                            MinHeight="44" MinWidth="140"/>
-                </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
-                            HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button x:Name="DockReloadBtn" Content="Reload" Click="DockReload_Click" MinHeight="44"/>
-                    <Button x:Name="DockCommitBtn" Content="Publish status" Click="DockCommit_Click"
-                            Background="#FF4F18" Foreground="White" MinHeight="44" MinWidth="140"/>
-                </StackPanel>
+            <!-- Taskbar — module nav CENTER · Flush / licence status RIGHT -->
+            <Grid VerticalAlignment="Bottom" Margin="16,0,16,16" Height="60">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="12,0">
+                    <Grid Height="60">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock x:Name="TrayText" Text="AConsulting"
+                                       Style="{StaticResource HcwLabel}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                                    VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Button x:Name="NavPracticeBtn" Content="Practice" Style="{StaticResource HcwGhostButton}"
+                                    Click="NavPractice_Click"/>
+                            <Button x:Name="NavClientsBtn" Content="Clients" Style="{StaticResource HcwGhostButton}"
+                                    Click="NavClients_Click"/>
+                            <Button x:Name="NavProjectsBtn" Content="Projects" Style="{StaticResource HcwGhostButton}"
+                                    Click="NavProjects_Click"/>
+                            <Button x:Name="NavOfficeBtn" Content="Office" Style="{StaticResource HcwGhostButton}"
+                                    Click="NavOffice_Click"/>
+                            <Button x:Name="NavTasksBtn" Content="Tasks" Style="{StaticResource HcwGhostButton}"
+                                    Click="NavTasks_Click"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock x:Name="LicenceChipText" Text="Licence · Connect"
+                                       Style="{StaticResource HcwLabel}" VerticalAlignment="Center"
+                                       ToolTipService.ToolTip="Activate only in AORMS Connect; this app imports session.json"/>
+                            <Button Content="Re-import" Click="ReimportConnectSession_Click"
+                                    Style="{StaticResource HcwGhostButton}"
+                                    ToolTipService.ToolTip="Re-import %LocalAppData%\AORMS-Connect\session.json"/>
+                            <Button Content="Flush" Click="Flush_Click" Style="{StaticResource HcwDockPrimary}"/>
+                            <Button Content="Refresh" Click="Refresh_Click" Style="{StaticResource HcwGhostButton}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
             </Grid>
-        </Border>
 
-        <Border Grid.Row="3" Background="#ECEEF2" Padding="16,8" BorderBrush="#D0D4DC" BorderThickness="0,1,0,0">
-            <StackPanel Spacing="6">
-                <TextBlock x:Name="TrayText" Text="AConsulting · Projects"
-                           FontSize="11" Opacity="0.55"/>
-                <TextBlock x:Name="HubStatusText" TextWrapping="Wrap" FontSize="12"/>
-                <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap"
-                           FontFamily="Consolas" FontSize="11"/>
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBox x:Name="LicenseKeyBox" Width="280"
-                             PlaceholderText="License key (HLP-…)" Header="Activate"/>
-                    <Button Content="Activate" Click="Activate_Click" VerticalAlignment="Bottom"/>
-                    <Button Content="Flush meta" Click="Flush_Click" VerticalAlignment="Bottom"/>
-                    <Button Content="Refresh" Click="Refresh_Click" VerticalAlignment="Bottom"/>
-                </StackPanel>
+            <!-- Status strip above clock area (compact) -->
+            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                        Margin="24,0,24,84" MaxWidth="420" Spacing="2" IsHitTestVisible="False">
+                <TextBlock x:Name="HubStatusText" TextWrapping="Wrap" FontSize="11" Opacity="0.65"
+                           Foreground="{StaticResource HcwInkBrush}"/>
+                <TextBlock x:Name="LogText" Opacity="0.55" TextWrapping="Wrap"
+                           FontFamily="Consolas" FontSize="10"
+                           Foreground="{StaticResource HcwInkBrush}"/>
             </StackPanel>
-        </Border>
+        </Grid>
     </Grid>
 </Window>

@@ -1,47 +1,43 @@
-# AConsulting WinUI shell (D5 + HCW geography)
+# AConsulting WinUI shell (HCW geography)
 
-**Status:** Unpackaged WinUI 3 shell · **Updated:** 2026-08-10 (Ask ESTI)  
-**Parity:** esti [`DESKTOP-WEB-PARITY-UX.md`](https://github.com/HolagundiWorks/aorms/blob/main/docs/esti/DESKTOP-WEB-PARITY-UX.md)
+**Status:** Unpackaged WinUI 3 · **Updated:** 2026-08-10  
+**Canon:** esti [`DESKTOP-WINUI-UX.md`](https://github.com/HolagundiWorks/aorms/blob/main/docs/esti/DESKTOP-WINUI-UX.md) · [`DESKTOP-WEB-PARITY-UX.md`](https://github.com/HolagundiWorks/aorms/blob/main/docs/esti/DESKTOP-WEB-PARITY-UX.md)
 
-## Chrome (HCW scaffold)
+## Chrome (manager full shell)
 
 ```text
-┌─ Ribbon (Practice · Clients · Projects · Office · Tasks) ─┐
-├─ Stage — capacity / notes | clients | engagements | … ───┤
-├─ ActionDock — Clear · [Import] · Save · Reload · Publish ─┤
-└─ Status tray · hub + licence ─────────────────────────────┘
+┌─ Floating ribbon 56 — brand · Local AI ──────────────────────────────┐
+├─ Stage (Fog) — Practice · Clients · Projects · Office · Tasks ───────┤
+│              ╭─ ActionDock Clear · Import · Save · Reload · Publish ─╮│
+├─ floating Taskbar 60 — Practice…Tasks | Licence · Re-import · Flush ──┤
+└─ (clock / wellness — optional follow-on; AStudio reference) ─────────┘
 ```
 
-| Ribbon | Stage | Dock Save | Dock Publish |
-| --- | --- | --- | --- |
-| **Practice** (live) | Capacity · **Ask ESTI** (Ollama) · firm notes | Save notes | Flush meta |
-| **Clients** (live) | `local_clients` | Save client | Publish client (`clientStatus`) |
-| **Projects** (live) | `local_engagements` | Save engagement | Publish status (`engagementStatus`) |
-| **Office** (live) | `local_office_enquiries` | Save enquiry | Publish decision (`officeEnquiry`) |
-| **Tasks** (live) | Local tasks board | Save local | Publish to hub (Mongo ops) |
-
-Ask ESTI mirrors AStudio S4 — local Ollama only; transcripts never synced.  
-Env: `ESTI_OLLAMA_URL` · `ESTI_OLLAMA_MODEL`.
-
-## Stores (firm.db)
-
-Path: `%LocalAppData%\AConsulting\firm.db`
-
-| Table | Role |
+| Token / rule | Value |
 | --- | --- |
-| `local_practice` | Firm name + notes (single row) |
-| `local_clients` | `clientStatus` meta |
-| `local_engagements` | `engagementStatus` (+ Connect import) |
-| `local_office_enquiries` | `officeEnquiry` (GO / NO_GO) |
-| Bridge `local_tasks` | Mongo ops |
+| Theme | `Themes/HcwTheme.xaml` (AStudio SoT copy) |
+| Density | **1×** — no window scale |
+| Hits | Dock **44** · taskbar **35** · radius **8** |
+| Active nav | Accent underline (not orange fill) |
+| Module nav | Taskbar CENTER — not ribbon |
+| Licence | **Activate only in AORMS Connect**; import `session.json` |
 
-## Build / run
+## Stages
+
+| Taskbar | Stage | Dock Save | Dock Publish |
+| --- | --- | --- | --- |
+| **Practice** | Capacity · Ask ESTI · firm notes | Save notes | Flush meta |
+| **Clients** | `local_clients` | Save client | Publish `clientStatus` |
+| **Projects** | `local_engagements` | Save engagement | Publish `engagementStatus` |
+| **Office** | `local_office_enquiries` | Save enquiry | Publish `officeEnquiry` |
+| **Tasks** | Local tasks board | Save local | Publish hub |
+
+Ask ESTI = local Ollama only. Env: `ESTI_OLLAMA_URL` · `ESTI_OLLAMA_MODEL`.
+
+## Build
 
 ```bat
 build-winui.cmd
-set ESTI_HUB_URL=http://127.0.0.1:4000
-set ESTI_OLLAMA_URL=http://127.0.0.1:11434
-set ESTI_OLLAMA_MODEL=llama3.2
 ```
 
-MSIX = D6. Deep KPIs / RACI = later. AQC technical apps stay separate.
+firm.db: `%LocalAppData%\AConsulting\firm.db`
