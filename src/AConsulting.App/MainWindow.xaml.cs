@@ -36,7 +36,8 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        ExtendsContentIntoTitleBar = false;
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
         _bridge = AormsBridgeHost.CreateFromEnvironment();
         var dbPath = LocalEngagementsStore.DefaultFirmDbPath();
         _engagements = new LocalEngagementsStore(dbPath);
